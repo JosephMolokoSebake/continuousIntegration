@@ -1,0 +1,32 @@
+#include "Cst4DataFile.h"
+#include "Cst4SelectSiteDlg.h"
+
+
+   WORD wSiteID;
+
+   wSiteID=wSelectCst4Site(this,wSiteID);
+
+   Cst4DataFile Cst4Fil;
+
+      AISMsgClass AISMsg;
+      AISDec.GetAISMsg(&AISMsg);
+      JTime T(true);
+      if (AISMsg.bContainsDynamicData())
+         {
+         Cst4_AIS_Dynamic DynamicMsg(T,AISMsg.nGetMMSI(),AISMsg.GetLL(),AISMsg.dGetSOG(),AISMsg.dGetCOG(),wSiteID);
+         Cst4Fil.AddMessage(DynamicMsg);
+         }
+
+      if (AISMsg.bContainsVoyageStaticData())
+         {
+         BYTE aucInfo[4096];
+         int nSize=AISMsg.dwGetExtraInfoBuf(aucInfo,4096);
+         if (nSize>0)
+            {
+            Cst4_AIS_Static StaticMsg(AISMsg.nGetMMSI(),aucInfo,nSize,wSiteID);
+            StaticMsg.SetTime(T);
+            Cst4Fil.AddMessage(StaticMsg);
+            }
+         }
+
+   Cst4Fil.bSaveFile("File Name.Cst4Data");
